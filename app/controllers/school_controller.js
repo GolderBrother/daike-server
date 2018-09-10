@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq..com 
  * @Date: 2018-08-20 14:55:28 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-07 21:04:17
+ * @Last Modified time: 2018-09-10 09:03:45
  * @Description: school api 
  */
 
@@ -36,7 +36,7 @@ const insertAllSchool = (ctx,next) => {
 
 const searchSchoolByName = async (ctx, next) => {
   const req = ctx.request.body;
-
+  // limit 分页
   const schools = await School_col.find({
     name: new RegExp(req.schoolName)
   }, { _id: 0 }).limit(10);

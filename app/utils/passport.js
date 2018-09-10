@@ -2,7 +2,7 @@
  * @Author: james.zhang 
  * @Date: 2018-08-14 16:03:32 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-07 21:28:31
+ * @Last Modified time: 2018-09-10 09:00:08
  * @Description: password bcrypt & validate
  */
 

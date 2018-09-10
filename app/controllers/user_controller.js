@@ -2,12 +2,13 @@
  * @Author: james 
  * @Email: 1204788939@qq.com 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-07 21:05:01
+ * @Last Modified time: 2018-09-10 09:12:51
  * @Description: user api 
  */
 
 const config = require('./../../config');
 const passport = require('./../utils/passport');
+// 获取User模型(model)
 const User_col = require('./../models/user');
 const Passport_col = require('./../models/password')
 const uuidv1 = require('uuid/v1');
@@ -32,10 +33,7 @@ const insertAllUsers = (ctx,next) => {
       data = JSON.parse(data)
       // 获取User模型(model)
       let saveCount = 0;
-      // const User = mongoose.model('User')
       data.map(async (value,index) => {
-        // 实例化模型，才能调用模型方法
-        // const newUser = User_col(value);
         try {
           await User_col.create(value);
           saveCount++;
@@ -155,8 +153,9 @@ const register = async (ctx, next) => {
   if (newUser) {
     // 加密
     const hash = await passport.encrypt(req.password, config.saltTimes);
+    const { userId,account } = newUser;
     const result = await Passport_col.create({
-      userId: userId,
+      userId,
       hash
     })
 
@@ -165,8 +164,8 @@ const register = async (ctx, next) => {
         code: 1,
         msg: '注册成功！',
         data: {
-          userId: newUser.userId,
-          account: newUser.account
+          userId,
+          account
         }
       };
     }
