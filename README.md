@@ -1,6 +1,6 @@
 ## 启动
 ```
-npm install
+npm install or cnpm install or yarn install 
 
 node app.js
 ```
@@ -20,8 +20,11 @@ node app.js
 │   │   └── user.js            // 用户表
 │   └── utils                  // 工具库
 │   │   ├── formatDate.js      // 时间格式化
+│   │   └── formatJsonData.js  // 导入数据库的 json 数据处理                                       
 │   │   └── passport.js        // 用户密码加密和验证工具
-├── db-daike                   // 数据库导出的 json 文件（没地方放就放这了）
+│   └── service                // 服务层
+│   │   └── init.js            // 初始化链接mondodb
+├── data_json                  // 导入数据库的 json 文件(用来快速创建数据)
 ├── routes                     // 路由目录
 │   └── api                    // 接口目录
 │   │   ├── course_router.js   // 课程相关接口

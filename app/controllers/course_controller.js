@@ -2,8 +2,8 @@
  * @Author: james 
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-17 17:03:09 
- * @Last Modified by: mikey.zhaopeng
- * @Last Modified time: 2018-09-07 20:44:07
+ * @Last Modified by: james.zhang
+ * @Last Modified time: 2018-09-11 17:26:29
  * @Description: course api 
  */
 
@@ -16,23 +16,23 @@ const fs = require("fs");
 
 
 // 插入所有的课程数据
-const insertAllCourse = (ctx,next) => {
-  console.log("formatJsonData:",formatJsonData)
-  fs.readFile('./data_json/courses.json','utf8',(err,data) => {
-    if(err){
-      console.error('read file error:'+err);
-    }else{
+const insertAllCourse = (ctx, next) => {
+  console.log("formatJsonData:", formatJsonData)
+  fs.readFile('./data_json/courses.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('read file error:' + err);
+    } else {
       // data = JSON.parse(data);
-      data = formatJsonData(JSON.parse(data),"province","reward");
+      data = formatJsonData(JSON.parse(data), "province", "reward");
       console.log(data)
       let saveCount = 0;
-      data.map(async (item,index) => {
+      data.map(async (item, index) => {
         try {
           await Course_col.create(item);
           saveCount++;
-          console.log("成功:",saveCount)
+          console.log("成功:", saveCount)
         } catch (error) {
-          console.log("失败:",error)
+          console.log("失败:", error)
         }
       })
     }
@@ -46,7 +46,9 @@ const getCourse = async (ctx, next) => {
 
   const courses = await Course_col.find({
     status: req.status
-  }, { _id: 0 });
+  }, {
+    _id: 0
+  });
 
   if (courses) {
     ctx.status = 200;
@@ -77,16 +79,20 @@ const getCourseByType = async (ctx, next) => {
     }
     return;
   }
-
+  // 第二个条件为筛选字段,例如：{collections: 1,_id:0} 只需要collections字段，不需要 _id 的字段
   let courses = [];
   if (type == 'publish') {
     courses = await Course_col.find({
       publisher: userId
-    }, { _id: 0 });
-  } else if (type == 'substitute') {// receiver
+    }, {
+      _id: 0
+    });
+  } else if (type == 'substitute') { // receiver
     courses = await Course_col.find({
       receiver: userId
-    }, { _id: 0 });
+    }, {
+      _id: 0
+    });
   } else {
     const result = await User_col.findOne({
       userId
@@ -94,7 +100,7 @@ const getCourseByType = async (ctx, next) => {
       collections: 1,
       _id: 0
     });
-  
+
     const collections = result.collections;
 
     for (let collection of collections) {
@@ -113,6 +119,66 @@ const getCourseByType = async (ctx, next) => {
     data: courses
   }
 }
+
+// 删除我 发布（publish）的课程 
+// 取消我 代课（substitute）| 收藏（collect）的课程
+const deleteCourseByType = async (ctx, next) => {
+  try {
+    console.log(ctx.request.body);
+    const {
+      userId,
+      type,
+      course
+    } = ctx.request.body;
+    ctx.status = 200;
+    if (!userId || !type) {
+      ctx.body = {
+        code: 0,
+        msg: "缺少必要参数！"
+      }
+      return;
+    }
+    let result = {};
+    const { id:coursId } = course
+    if (type == "publish") {
+      result = await Course_col.deleteOne({
+        id:coursId
+      });
+    } else if (type == "substitute") {
+      // 取消我 代课(substitute) 的课程
+      result = await Course_col.update({
+        receiver: userId,
+        id:coursId
+      }, {
+        $set: {
+          status: 'open',
+          closeTime: "",
+          receiver: "",
+          receiverName: "",
+        }
+      });
+    } else {
+      // 取消我 收藏（collect）的课程
+      result = await User_col.update({
+        userId
+      },{
+        $pull:{
+          "collections":coursId
+        }
+      })
+    }
+    ctx.body = {
+      code: 1,
+      msg: result
+    }
+  } catch (error) {
+    console.log(error)
+    throw new Error(error.message)
+  }
+
+}
+
+
 
 // 发布课程
 const publishCourse = async (ctx, next) => {
@@ -153,7 +219,7 @@ const substituteCourse = async (ctx, body) => {
     ctx.body = {
       code: 0,
       msg: '缺少必要参数'
-    }  
+    }
     return;
   }
 
@@ -184,7 +250,7 @@ const substituteCourse = async (ctx, body) => {
     id: course.id
   }, {
     $set: {
-      status: 'received', 
+      status: 'received',
       closeTime: formatDate(new Date()),
       receiver: req.userId,
       receiverName: req.userName,
@@ -217,7 +283,7 @@ const collectCourse = async (ctx, next) => {
     }
     return;
   }
-  
+
   const result = await User_col.findOne({
     userId
   }, {
@@ -234,7 +300,7 @@ const collectCourse = async (ctx, next) => {
       msg: '已收藏该课程！'
     }
     return;
-  } 
+  }
 
   collections.push(courseId);
 
@@ -255,6 +321,7 @@ const collectCourse = async (ctx, next) => {
 module.exports = {
   getCourse,
   getCourseByType,
+  deleteCourseByType,
   insertAllCourse,
   publishCourse,
   substituteCourse,
