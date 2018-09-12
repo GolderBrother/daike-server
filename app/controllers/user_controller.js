@@ -2,7 +2,7 @@
  * @Author: james 
  * @Email: 1204788939@qq.com 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-10 09:12:51
+ * @Last Modified time: 2018-09-12 10:58:44
  * @Description: user api 
  */
 
@@ -25,22 +25,22 @@ const get = async (ctx, next) => {
 }
 
 // 批量插入用户名等数据
-const insertAllUsers = (ctx,next) => {
-  fs.readFile('./data_json/user.json','utf8',(err,data) => {
-    if(err){
-      console.error('read file error:'+err)
-    }else{
+const insertAllUsers = (ctx, next) => {
+  fs.readFile('./data_json/user.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error('read file error:' + err)
+    } else {
       data = JSON.parse(data)
       // 获取User模型(model)
       let saveCount = 0;
-      data.map(async (value,index) => {
+      data.map(async (value, index) => {
         try {
           await User_col.create(value);
           saveCount++;
-          console.log('成功:',saveCount);
+          console.log('成功:', saveCount);
         } catch (error) {
           saveCount--;
-          console.log('失败:',error.message)
+          console.log('失败:', error.message)
         }
       })
     }
@@ -48,20 +48,20 @@ const insertAllUsers = (ctx,next) => {
   ctx.body = "开始导入数据"
 }
 
-const insertAllPassword = (ctx,next) => {
-  fs.readFile('./data_json/password.json','utf8',(err,data) => {
-    if(err){
-      console.log('read file error:',err)
-    }else{
+const insertAllPassword = (ctx, next) => {
+  fs.readFile('./data_json/password.json', 'utf8', (err, data) => {
+    if (err) {
+      console.log('read file error:', err)
+    } else {
       let createCount = 0;
       data = JSON.parse(data);
-      data.map(async (item,index) => {
+      data.map(async (item, index) => {
         try {
           await Passport_col.create(item);
           createCount++;
-          console.log('成功:',createCount);
+          console.log('成功:', createCount);
         } catch (error) {
-          console.log('失败:',error);
+          console.log('失败:', error);
         }
       })
     }
@@ -142,7 +142,7 @@ const register = async (ctx, next) => {
     }
     return;
   }
-  
+
   // 插入新用户
   const userId = uuidv1();
   const newUser = await User_col.create({
@@ -153,7 +153,10 @@ const register = async (ctx, next) => {
   if (newUser) {
     // 加密
     const hash = await passport.encrypt(req.password, config.saltTimes);
-    const { userId,account } = newUser;
+    const {
+      userId,
+      account
+    } = newUser;
     const result = await Passport_col.create({
       userId,
       hash
@@ -174,6 +177,51 @@ const register = async (ctx, next) => {
       code: 0,
       msg: '注册失败！'
     };
+  }
+}
+
+// 更改密码
+const changePassword = async (ctx, next) => {
+  try {
+    const {
+      account,
+      password
+    } = ctx.request.body;
+    const user = await User_col.findOne({
+      account
+    });
+    ctx.status = 200;
+    if (!user || user === null) {
+      ctx.body = {
+        code: 0,
+        msg: "用户名不存在"
+      }
+      return
+    }
+    const {
+      userId
+    } = user;
+    // 密码:加盐加密
+    const newHash = await passport.encrypt(password, config.saltTimes)
+    const res = await Passport_col.updateOne({
+      userId
+    }, {
+      $set: {
+        hash: newHash
+      }
+    })
+    if (res.ok) {
+      ctx.body = {
+        code: 1,
+        msg: 'change password successed',
+        data: {
+          account
+        }
+      }
+    }
+
+  } catch (error) {
+    throw new Error(error.message)
   }
 }
 
@@ -205,6 +253,7 @@ module.exports = {
   post,
   login,
   register,
+  changePassword,
   updateUserInfo,
   insertAllUsers,
   insertAllPassword

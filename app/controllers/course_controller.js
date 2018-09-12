@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-17 17:03:09 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-11 17:26:29
+ * @Last Modified time: 2018-09-12 09:15:20
  * @Description: course api 
  */
 
@@ -48,7 +48,9 @@ const getCourse = async (ctx, next) => {
     status: req.status
   }, {
     _id: 0
-  });
+  }).sort({
+    _id: -1
+  }); //按照 _id 字段 倒序排列
 
   if (courses) {
     ctx.status = 200;
@@ -62,6 +64,48 @@ const getCourse = async (ctx, next) => {
       code: 0,
       msg: '参数错误！'
     }
+  }
+}
+// 获取所有课程  分页
+const getCourseByPage = async (ctx, next) => {
+  try {
+    const {
+      status
+    } = ctx.request.body;
+    const pageNum = ctx.request.body.pageNum * 1,
+      pageIndex = ctx.request.body.pageIndex * 1;
+    if (pageNum && pageIndex) {
+      // 查询开始页数(skip)和查询条数(limit)
+      const startIndex = (pageIndex-1) * pageNum;
+      const courses = await Course_col.find({
+        status
+      }, {
+        _id: 0
+      }).skip(startIndex).limit(pageNum).sort({
+        _id: -1
+      });
+      ctx.status = 200;
+      if (courses.length) {
+        ctx.body = {
+          code: 1,
+          data: courses
+        }
+      } else {
+        ctx.body = {
+          code: 0,
+          msg: "参数错误！"
+        }
+      }
+    } else {
+      ctx.status = 200;
+      ctx.body = {
+        code: 0,
+        msg: "参数错误！"
+      }
+    }
+  } catch (error) {
+    console.log(error);
+    throw new Error(error.message)
   }
 }
 
@@ -139,16 +183,18 @@ const deleteCourseByType = async (ctx, next) => {
       return;
     }
     let result = {};
-    const { id:coursId } = course
+    const {
+      id: coursId
+    } = course
     if (type == "publish") {
       result = await Course_col.deleteOne({
-        id:coursId
+        id: coursId
       });
     } else if (type == "substitute") {
       // 取消我 代课(substitute) 的课程
       result = await Course_col.update({
         receiver: userId,
-        id:coursId
+        id: coursId
       }, {
         $set: {
           status: 'open',
@@ -161,9 +207,9 @@ const deleteCourseByType = async (ctx, next) => {
       // 取消我 收藏（collect）的课程
       result = await User_col.update({
         userId
-      },{
-        $pull:{
-          "collections":coursId
+      }, {
+        $pull: {
+          "collections": coursId
         }
       })
     }
@@ -321,6 +367,7 @@ const collectCourse = async (ctx, next) => {
 module.exports = {
   getCourse,
   getCourseByType,
+  getCourseByPage,
   deleteCourseByType,
   insertAllCourse,
   publishCourse,

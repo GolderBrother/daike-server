@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-14 16:04:18 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-07 21:08:24
+ * @Last Modified time: 2018-09-12 10:01:57
  * @Description: user router
  */
 
@@ -17,6 +17,7 @@ router.get('/insertAllPassword',user_controller.insertAllPassword);
 router.post('/post', user_controller.post);
 router.post('/login', user_controller.login);
 router.post('/register', user_controller.register);
+router.post('/changePassword',user_controller.changePassword);
 router.post('/update/user', user_controller.updateUserInfo);
 
 module.exports = router;
