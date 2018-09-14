@@ -2,13 +2,13 @@
  * @Author: james.zhang 
  * @Date: 2018-09-07 21:26:07 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 15:03:56
+ * @Last Modified time: 2018-09-14 15:21:55
  * @Description: /api 
  */
 
 const mongoose = require('mongoose');
 const glob = require("glob");
-const { resolve } = require('path');
+const path = require('path');
 const config = require('../config');
 
 const connectMongoDb = ()　=> {
@@ -55,7 +55,7 @@ const connectMongoDb = ()　=> {
 
 // glob.sync同步引入所有的schema文件，然后用forEach的回调方法require（引入）进来
 const initSchemas = () => {
-    glob.sync(resolve(__dirname,'../models/*.js')).forEach(require)
+    glob.sync(path.resolve(__dirname,'../models/*.js')).forEach(require)
 }
 
 module.exports = {
