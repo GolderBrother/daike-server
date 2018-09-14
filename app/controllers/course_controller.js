@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-17 17:03:09 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-12 09:15:20
+ * @Last Modified time: 2018-09-12 17:04:46
  * @Description: course api 
  */
 
@@ -124,19 +124,20 @@ const getCourseByType = async (ctx, next) => {
     return;
   }
   // 第二个条件为筛选字段,例如：{collections: 1,_id:0} 只需要collections字段，不需要 _id 的字段
+  // sort 排序 按照字段 _id 倒序
   let courses = [];
   if (type == 'publish') {
     courses = await Course_col.find({
       publisher: userId
     }, {
       _id: 0
-    });
+    }).sort({"_id":-1});
   } else if (type == 'substitute') { // receiver
     courses = await Course_col.find({
       receiver: userId
     }, {
       _id: 0
-    });
+    }).sort({"_id":-1});
   } else {
     const result = await User_col.findOne({
       userId
@@ -153,7 +154,6 @@ const getCourseByType = async (ctx, next) => {
       }, {
         _id: 0
       });
-
       courses.push(course);
     }
   }

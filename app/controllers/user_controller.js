@@ -2,11 +2,11 @@
  * @Author: james 
  * @Email: 1204788939@qq.com 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-12 10:58:44
+ * @Last Modified time: 2018-09-14 15:08:44
  * @Description: user api 
  */
 
-const config = require('./../../config');
+const config = require('./../config');
 const passport = require('./../utils/passport');
 // 获取User模型(model)
 const User_col = require('./../models/user');
@@ -48,6 +48,7 @@ const insertAllUsers = (ctx, next) => {
   ctx.body = "开始导入数据"
 }
 
+// 批量插入密码数据
 const insertAllPassword = (ctx, next) => {
   fs.readFile('./data_json/password.json', 'utf8', (err, data) => {
     if (err) {
@@ -235,6 +236,8 @@ const updateUserInfo = async (ctx, next) => {
   }, req);
 
   ctx.status = 200;
+  console.log(result)
+  // 判断数据是否有改变，没改变就保存失败
   if (result.nModified == 1) {
     ctx.body = {
       code: 1,

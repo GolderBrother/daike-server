@@ -3,13 +3,13 @@
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-14 16:04:18 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-12 10:01:57
+ * @Last Modified time: 2018-09-14 14:58:38
  * @Description: user router
  */
 
 const Router = require('koa-router');
 const router = new Router();
-const user_controller = require('./../../app/controllers/user_controller');
+const user_controller = require('../../controllers/user_controller');
 
 router.get('/get', user_controller.get);
 router.get('/insertAllUsers',user_controller.insertAllUsers);

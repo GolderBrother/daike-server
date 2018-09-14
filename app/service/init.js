@@ -2,20 +2,21 @@
  * @Author: james.zhang 
  * @Date: 2018-09-07 21:26:07 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-07 21:26:33
+ * @Last Modified time: 2018-09-14 15:03:56
  * @Description: /api 
  */
 
 const mongoose = require('mongoose');
 const glob = require("glob");
 const { resolve } = require('path');
-const config = require('../../config');
+const config = require('../config');
 
 const connectMongoDb = ()　=> {
     let maxConnectTimes = 0;
     const { db }= config;
     //连接数据库
-    mongoose.connect(db)
+    // 当前的URL字符串解析器被弃用,mongoose的 useNewUrlParser 警告解决办法
+    mongoose.connect(db,{useNewUrlParser:true})
     return new Promise ((resolve,reject) => {
         // 增加数据库监听事件
         // 数据库断开

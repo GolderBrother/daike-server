@@ -2,12 +2,12 @@
  * @Author: james 
  * @Date: 2018-08-14 16:02:33 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-07 21:27:10
+ * @Last Modified time: 2018-09-14 15:06:52
  * @Description: entry file
  */
 
 const Koa = require('koa');
-const config = require('./config');
+const config = require('./app/config');
 
 // https://www.npmjs.com/package/koa2-cors
 const cors = require('koa2-cors');
@@ -22,8 +22,10 @@ const { connectMongoDb,initSchemas } = require('./app/service/init')
 
 const app = new Koa();
 
+// 连接mongodb数据库
 connectMongoDb();
 
+// 同步引入所有的schema文件并发布模型
 initSchemas();
 
 /* 
@@ -39,10 +41,10 @@ mongoose.connect(config.db, {useNewUrlParser:true}, (err) => {
 app.use(cors());
 app.use(bodyParser());
 
-const user_router = require('./routes/api/user_router');
-const course_router = require('./routes/api/course_router');
-const school_router = require('./routes/api/school_router');
-const example_router = require('./routes/api/example_router');
+const user_router = require('./app/routes/api/user_router');
+const course_router = require('./app/routes/api/course_router');
+const school_router = require('./app/routes/api/school_router');
+const example_router = require('./app/routes/api/example_router');
 
 app.use(user_router.routes()).use(user_router.allowedMethods());
 app.use(course_router.routes()).use(course_router.allowedMethods());
