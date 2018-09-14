@@ -2,7 +2,7 @@
  * @Author: james.zhang 
  * @Date: 2018-09-07 21:26:07 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 15:53:39
+ * @Last Modified time: 2018-09-14 16:01:40
  * @Description: /api 
  */
 
@@ -19,7 +19,7 @@ const connectMongoDb = ()　=> {
     mongoose.connect(db,{useNewUrlParser:true})
     return new Promise ((resolve,reject) => {
         // 增加数据库监听事件
-        // 数据库断开
+        // 数据库断开 连接断开三次内自动连接
         mongoose.connection.on("disconnect",() => {
             console.log('***********数据库断开***********')
             if(maxConnectTimes < 3){
@@ -30,7 +30,7 @@ const connectMongoDb = ()　=> {
                 throw new Error("Failed to connect to database")
             }
         })
-        // 数据库错误
+        // 数据库错误 连接错误三次内自动连接
         mongoose.connection.on("error",() => {
             if(maxConnectTimes < 3){
                 maxConnectTimes++;
