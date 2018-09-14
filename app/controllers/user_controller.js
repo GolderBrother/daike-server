@@ -2,7 +2,7 @@
  * @Author: james 
  * @Email: 1204788939@qq.com 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 15:08:44
+ * @Last Modified time: 2018-09-14 18:04:28
  * @Description: user api 
  */
 
@@ -183,53 +183,47 @@ const register = async (ctx, next) => {
 
 // 更改密码
 const changePassword = async (ctx, next) => {
-  try {
-    const {
-      account,
-      password
-    } = ctx.request.body;
-    const user = await User_col.findOne({
-      account
-    });
-    ctx.status = 200;
-    if (!user || user === null) {
-      ctx.body = {
-        code: 0,
-        msg: "用户名不存在"
-      }
-      return
+  const {
+    account,
+    password
+  } = ctx.request.body;
+  const user = await User_col.findOne({
+    account
+  });
+  ctx.status = 200;
+  if (!user || user === null) {
+    ctx.body = {
+      code: 0,
+      msg: "用户名不存在"
     }
-    const {
-      userId
-    } = user;
-    // 密码:加盐加密
-    const newHash = await passport.encrypt(password, config.saltTimes)
-    const res = await Passport_col.updateOne({
-      userId
-    }, {
-      $set: {
-        hash: newHash
-      }
-    })
-    if (res.ok) {
-      ctx.body = {
-        code: 1,
-        msg: 'change password successed',
-        data: {
-          account
-        }
+    return
+  }
+  const {
+    userId
+  } = user;
+  // 密码:加盐加密
+  const newHash = await passport.encrypt(password, config.saltTimes)
+  const res = await Passport_col.updateOne({
+    userId
+  }, {
+    $set: {
+      hash: newHash
+    }
+  })
+  if (res.ok) {
+    ctx.body = {
+      code: 1,
+      msg: 'change password successed',
+      data: {
+        account
       }
     }
-
-  } catch (error) {
-    throw new Error(error.message)
   }
 }
 
 // 更新个人信息
 const updateUserInfo = async (ctx, next) => {
   const req = ctx.request.body;
-
   // 获取用户的 userId
   const result = await User_col.updateOne({
     userId: req.userId

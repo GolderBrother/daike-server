@@ -2,7 +2,7 @@
  * @Author: james 
  * @Date: 2018-08-14 16:02:33 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 15:06:52
+ * @Last Modified time: 2018-09-14 17:57:38
  * @Description: entry file
  */
 
@@ -20,6 +20,7 @@ const bodyParser = require('koa-bodyparser');
 
 const { connectMongoDb,initSchemas } = require('./app/service/init')
 
+const handleError = require('./app/utils/handleError');
 const app = new Koa();
 
 // 连接mongodb数据库
@@ -45,6 +46,9 @@ const user_router = require('./app/routes/api/user_router');
 const course_router = require('./app/routes/api/course_router');
 const school_router = require('./app/routes/api/school_router');
 const example_router = require('./app/routes/api/example_router');
+
+// 所有的错误统一拦截处理 相当于所有的收到的请求都会走这里
+app.use(handleError);
 
 app.use(user_router.routes()).use(user_router.allowedMethods());
 app.use(course_router.routes()).use(course_router.allowedMethods());

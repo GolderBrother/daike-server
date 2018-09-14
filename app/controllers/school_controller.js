@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq..com 
  * @Date: 2018-08-20 14:55:28 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-10 09:03:45
+ * @Last Modified time: 2018-09-14 18:03:44
  * @Description: school api 
  */
 
@@ -34,6 +34,7 @@ const insertAllSchool = (ctx,next) => {
 }
 
 
+// 学校搜索
 const searchSchoolByName = async (ctx, next) => {
   const req = ctx.request.body;
   // limit 分页

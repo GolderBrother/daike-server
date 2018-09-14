@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-17 17:03:09 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-12 17:04:46
+ * @Last Modified time: 2018-09-14 18:02:34
  * @Description: course api 
  */
 
@@ -43,7 +43,6 @@ const insertAllCourse = (ctx, next) => {
 // 获取所有课程
 const getCourse = async (ctx, next) => {
   const req = ctx.request.body;
-
   const courses = await Course_col.find({
     status: req.status
   }, {
@@ -65,48 +64,45 @@ const getCourse = async (ctx, next) => {
       msg: '参数错误！'
     }
   }
+
 }
 // 获取所有课程  分页
 const getCourseByPage = async (ctx, next) => {
-  try {
-    const {
+  const {
+    status
+  } = ctx.request.body;
+  const pageNum = ctx.request.body.pageNum * 1,
+    pageIndex = ctx.request.body.pageIndex * 1;
+  if (pageNum && pageIndex) {
+    // 查询开始页数(skip)和查询条数(limit)
+    const startIndex = (pageIndex - 1) * pageNum;
+    const courses = await Course_col.find({
       status
-    } = ctx.request.body;
-    const pageNum = ctx.request.body.pageNum * 1,
-      pageIndex = ctx.request.body.pageIndex * 1;
-    if (pageNum && pageIndex) {
-      // 查询开始页数(skip)和查询条数(limit)
-      const startIndex = (pageIndex-1) * pageNum;
-      const courses = await Course_col.find({
-        status
-      }, {
-        _id: 0
-      }).skip(startIndex).limit(pageNum).sort({
-        _id: -1
-      });
-      ctx.status = 200;
-      if (courses.length) {
-        ctx.body = {
-          code: 1,
-          data: courses
-        }
-      } else {
-        ctx.body = {
-          code: 0,
-          msg: "参数错误！"
-        }
+    }, {
+      _id: 0
+    }).skip(startIndex).limit(pageNum).sort({
+      _id: -1
+    });
+    ctx.status = 200;
+    if (courses.length) {
+      ctx.body = {
+        code: 1,
+        data: courses
       }
     } else {
-      ctx.status = 200;
       ctx.body = {
         code: 0,
         msg: "参数错误！"
       }
     }
-  } catch (error) {
-    console.log(error);
-    throw new Error(error.message)
+  } else {
+    ctx.status = 200;
+    ctx.body = {
+      code: 0,
+      msg: "参数错误！"
+    }
   }
+
 }
 
 // 获取我 发布（publish） | 代课（substitute）| 收藏（collect） 的课程
@@ -131,13 +127,17 @@ const getCourseByType = async (ctx, next) => {
       publisher: userId
     }, {
       _id: 0
-    }).sort({"_id":-1});
+    }).sort({
+      "_id": -1
+    });
   } else if (type == 'substitute') { // receiver
     courses = await Course_col.find({
       receiver: userId
     }, {
       _id: 0
-    }).sort({"_id":-1});
+    }).sort({
+      "_id": -1
+    });
   } else {
     const result = await User_col.findOne({
       userId
@@ -157,7 +157,6 @@ const getCourseByType = async (ctx, next) => {
       courses.push(course);
     }
   }
-
   ctx.body = {
     code: 1,
     data: courses
@@ -167,63 +166,55 @@ const getCourseByType = async (ctx, next) => {
 // 删除我 发布（publish）的课程 
 // 取消我 代课（substitute）| 收藏（collect）的课程
 const deleteCourseByType = async (ctx, next) => {
-  try {
-    console.log(ctx.request.body);
-    const {
-      userId,
-      type,
-      course
-    } = ctx.request.body;
-    ctx.status = 200;
-    if (!userId || !type) {
-      ctx.body = {
-        code: 0,
-        msg: "缺少必要参数！"
-      }
-      return;
-    }
-    let result = {};
-    const {
-      id: coursId
-    } = course
-    if (type == "publish") {
-      result = await Course_col.deleteOne({
-        id: coursId
-      });
-    } else if (type == "substitute") {
-      // 取消我 代课(substitute) 的课程
-      result = await Course_col.update({
-        receiver: userId,
-        id: coursId
-      }, {
-        $set: {
-          status: 'open',
-          closeTime: "",
-          receiver: "",
-          receiverName: "",
-        }
-      });
-    } else {
-      // 取消我 收藏（collect）的课程
-      result = await User_col.update({
-        userId
-      }, {
-        $pull: {
-          "collections": coursId
-        }
-      })
-    }
+  const {
+    userId,
+    type,
+    course
+  } = ctx.request.body;
+  ctx.status = 200;
+  if (!userId || !type) {
     ctx.body = {
-      code: 1,
-      msg: result
+      code: 0,
+      msg: "缺少必要参数！"
     }
-  } catch (error) {
-    console.log(error)
-    throw new Error(error.message)
+    return;
   }
-
+  let result = {};
+  const {
+    id: coursId
+  } = course
+  if (type == "publish") {
+    result = await Course_col.deleteOne({
+      id: coursId
+    });
+  } else if (type == "substitute") {
+    // 取消我 代课(substitute) 的课程
+    result = await Course_col.update({
+      receiver: userId,
+      id: coursId
+    }, {
+      $set: {
+        status: 'open',
+        closeTime: "",
+        receiver: "",
+        receiverName: "",
+      }
+    });
+  } else {
+    // 取消我 收藏（collect）的课程
+    result = await User_col.update({
+      userId
+    }, {
+      $pull: {
+        "collections": coursId
+      }
+    })
+  }
+  ctx.body = {
+    code: 1,
+    msg: result
+  }
 }
-
 
 
 // 发布课程
@@ -259,7 +250,6 @@ const publishCourse = async (ctx, next) => {
 // 代课
 const substituteCourse = async (ctx, body) => {
   const req = ctx.request.body;
-
   ctx.status = 200;
   if (!req.userId || !req.userName) {
     ctx.body = {
