@@ -2,7 +2,7 @@
  * @Author: james.zhang 
  * @Date: 2018-09-07 21:26:07 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 16:01:40
+ * @Last Modified time: 2018-09-14 16:19:12
  * @Description: /api 
  */
 
@@ -32,6 +32,7 @@ const connectMongoDb = ()　=> {
         })
         // 数据库错误 连接错误三次内自动连接
         mongoose.connection.on("error",() => {
+            console.log('***********数据库错误***********')
             if(maxConnectTimes < 3){
                 maxConnectTimes++;
                 mongoose.connect(db);
