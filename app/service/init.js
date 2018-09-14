@@ -2,7 +2,7 @@
  * @Author: james.zhang 
  * @Date: 2018-09-07 21:26:07 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 15:21:55
+ * @Last Modified time: 2018-09-14 15:53:39
  * @Description: /api 
  */
 
@@ -14,7 +14,7 @@ const config = require('../config');
 const connectMongoDb = ()　=> {
     let maxConnectTimes = 0;
     const { db }= config;
-    //连接数据库
+    // 连接数据库
     // 当前的URL字符串解析器被弃用,mongoose的 useNewUrlParser 警告解决办法
     mongoose.connect(db,{useNewUrlParser:true})
     return new Promise ((resolve,reject) => {
