@@ -3,7 +3,7 @@
  * @Email: 1204788939@qq.com
  * @Date: 2018-08-17 17:03:09 
  * @Last Modified by: james.zhang
- * @Last Modified time: 2018-09-14 18:02:34
+ * @Last Modified time: 2018-09-17 18:22:14
  * @Description: course api 
  */
 
@@ -161,6 +161,46 @@ const getCourseByType = async (ctx, next) => {
     code: 1,
     data: courses
   }
+}
+
+// 更新我 发布（publish）的课程
+const updateCourseByPublish = async (ctx,next) => {
+  let req = ctx.request.body;
+  const { id,publisher } = req;
+  if(!req.publisher || !req.schoolId || !req.courseTime || !req.coursePlace){
+    ctx.body = {
+      code:0,
+      msg:"缺少必要参数！"
+    }
+    return;
+  };
+  const updateRes = await Course_col.update({id,publisher},{$set:req});
+  console.log(updateRes)
+  ctx.body = {
+    code:1,
+    data:updateRes
+  }
+  // const courses = await Course_col.findOne({id:courseId,publisher:userId});
+  // console.log(courses)
+  // 有课程就更新，没有就新增
+  // if(courses.length > 0){
+  //   const updateRes = await Course_col.update({id:courseId,publisher:userId},{$set:req});
+  //   console.log(updateRes)
+  //   ctx.body = {
+  //     code:1,
+  //     data:updateRes
+  //   }
+  // }else{
+  //   const uuid = uuidv1();
+  //   req.id = uuid;
+  //   const createRes = await Course_col.create(req);
+  //   console.log(createRes)
+  //   ctx.body = {
+  //     code:1,
+  //     data:updateRes
+  //   }
+  // }
+
 }
 
 // 删除我 发布（publish）的课程 
@@ -362,5 +402,6 @@ module.exports = {
   insertAllCourse,
   publishCourse,
   substituteCourse,
-  collectCourse
+  collectCourse,
+  updateCourseByPublish
 }
